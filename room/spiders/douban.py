@@ -13,11 +13,14 @@ class DoubanSpider(scrapy.Spider):
     def parse(self, response):
         title_list = response.css('.olt .title')
 
-        yield [
+        items = [
             DoubanItem({
                 'title': item[0].extract(),
                 'link': item[1].extract()
             }) for item in zip(title_list.css('::attr(title)'), title_list.css('::attr(href)'))]
+
+        for item in items:
+            yield item
 
         total_num = int(response.css('.thispage::attr(data-total-page)').extract()[0])
         url_pair = response.url.split('start=')
