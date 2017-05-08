@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import scrapy
+from scrapy.conf import settings
 from room.items import DoubanItem
 
 class DoubanSpider(scrapy.Spider):
@@ -13,18 +14,12 @@ class DoubanSpider(scrapy.Spider):
     def parse(self, response):
         title_list = response.css('.olt .title')
 
-        items = [
-            DoubanItem({
-                'title': item[0].extract(),
-                'link': item[1].extract()
-            }) for item in zip(title_list.css('::attr(title)'), title_list.css('::attr(href)'))]
-
-        for item in items:
-            yield item
+        for item in zip(title_list.css('::attr(title)'), title_list.css('::attr(href)')):
+            yield DoubanItem({'title': item[0].extract(), 'link': item[1].extract()})
 
         total_num = int(response.css('.thispage::attr(data-total-page)').extract()[0])
         url_pair = response.url.split('start=')
-        current_num = int(url_pair[-1]) + 50
+        current_num = int(url_pair[-1]) + settings['PER_PAGE']
 
-        if current_num < min(total_num, 300):
+        if current_num < min(total_num, settings['MAX_NUM']):
             yield scrapy.Request(url_pair[0] + 'start=' + str(current_num), self.parse)
