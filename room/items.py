@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import scrapy
+from scrapy import Item, Field
 
-class DoubanItem(scrapy.Item):
-    title = scrapy.Field()
-    link = scrapy.Field()
+class DoubanItem(Item):
+    title = Field()
+    link = Field()
+
+class DoubanContentItem(Item):
+    content = Field()
+    link = Field()

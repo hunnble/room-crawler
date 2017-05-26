@@ -2,7 +2,7 @@
 
 import scrapy
 from scrapy.conf import settings
-from room.items import DoubanItem
+from room.items import DoubanItem, DoubanContentItem
 
 class DoubanSpider(scrapy.Spider):
     name = "douban"
@@ -16,7 +16,7 @@ class DoubanSpider(scrapy.Spider):
 
         for item in zip(title_list.css('::attr(title)'), title_list.css('::attr(href)')):
             yield DoubanItem({'title': item[0].extract(), 'link': item[1].extract()})
-            # yield scrapy.Request(item[1].extract(), self.parse_content)
+            yield scrapy.Request(item[1].extract(), self.parse_content)
 
         total_num = int(response.css('.thispage::attr(data-total-page)').extract()[0])
         url_pair = response.url.split('start=')
@@ -25,6 +25,7 @@ class DoubanSpider(scrapy.Spider):
         if current_num < min(total_num, settings['MAX_NUM']):
             yield scrapy.Request(url_pair[0] + 'start=' + str(current_num), self.parse)
 
-    # def parse_content(self, response):
-    #     content_list = response.css('.topic-content .topic-content p')
+    def parse_content(self, response):
+        content_list = response.css('.topic-content .topic-content p')
+        yield DoubanContentItem({'content': ''.join(content_list.extract()), 'link': response.url})
 
