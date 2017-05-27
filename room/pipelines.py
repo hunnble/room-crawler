@@ -7,7 +7,7 @@ redis = Redis()
 
 class DoubanPipeline(object):
     def process_item(self, item, spider):
-        if not item['title']:
+        if not item.get('title'):
             return item
 
         if redis.get(item['link']):
@@ -18,7 +18,7 @@ class DoubanPipeline(object):
 
 class DoubanContentPipeline(object):
     def process_item(self, item, spider):
-        if not item['content']:
+        if not item.get('content'):
             return item
 
         if redis.get(item['link']):
